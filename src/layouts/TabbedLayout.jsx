@@ -1,16 +1,22 @@
-import { usePathname, useRouter } from "next/navigation";
-import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
+import { usePathname, useRouter } from 'next/navigation'
+import { Box, Divider, Stack, Tab, Tabs } from '@mui/material'
+import { useSearchParams } from 'next/navigation'
 
 export const TabbedLayout = (props) => {
-  const { tabOptions, children } = props;
-  const router = useRouter();
-  const pathname = usePathname();
+  const { tabOptions, children } = props
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleTabsChange = (event, value) => {
-    router.push(value);
-  };
+    // Preserve existing query parameters when changing tabs
+    const currentParams = new URLSearchParams(searchParams.toString())
+    const queryString = currentParams.toString()
+    const newPath = queryString ? `${value}?${queryString}` : value
+    router.push(newPath)
+  }
 
-  const currentTab = tabOptions.find((option) => option.path === pathname);
+  const currentTab = tabOptions.find((option) => option.path === pathname)
 
   return (
     <Box
@@ -24,10 +30,10 @@ export const TabbedLayout = (props) => {
         <Box sx={{ ml: 3 }}>
           <Tabs
             onChange={handleTabsChange}
-            value={currentTab?.path}
+            value={currentTab?.path ?? false}
             variant="scrollable"
             sx={{
-              "& .MuiTab-root:first-of-type": {
+              '& .MuiTab-root:first-of-type': {
                 ml: 1,
               },
             }}
@@ -41,5 +47,5 @@ export const TabbedLayout = (props) => {
         {children}
       </Stack>
     </Box>
-  );
-};
+  )
+}

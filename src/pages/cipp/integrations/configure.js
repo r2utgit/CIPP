@@ -9,18 +9,18 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import CippIntegrationSettings from "/src/components/CippIntegrations/CippIntegrationSettings";
-import { Layout as DashboardLayout } from "/src/layouts/index.js";
+import CippIntegrationSettings from "../../../components/CippIntegrations/CippIntegrationSettings";
+import { Layout as DashboardLayout } from "../../../layouts/index.js";
 import { useForm } from "react-hook-form";
-import { useSettings } from "/src/hooks/use-settings";
-import { ApiGetCall } from "/src/api/ApiCall";
+import { useSettings } from "../../../hooks/use-settings";
+import { ApiGetCall, ApiPostCall } from "../../../api/ApiCall";
 import { useRouter } from "next/router";
-import extensions from "/src/data/Extensions.json";
+import extensions from "../../../data/Extensions.json";
 import { useEffect } from "react";
 import { ArrowPathIcon, ArrowTopRightOnSquareIcon, BeakerIcon } from "@heroicons/react/24/outline";
 import { SvgIcon } from "@mui/material";
 import { useState } from "react";
-import { CippApiResults } from "/src/components/CippComponents/CippApiResults";
+import { CippApiResults } from "../../../components/CippComponents/CippApiResults";
 import CippPageCard from "../../../components/CippCards/CippPageCard";
 import CippIntegrationTenantMapping from "../../../components/CippIntegrations/CippIntegrationTenantMapping";
 import CippIntegrationFieldMapping from "../../../components/CippIntegrations/CippIntegrationFieldMapping";
@@ -73,6 +73,9 @@ const Page = () => {
   const [syncQuery, setSyncQuery] = useState({ url: "", waiting: false, queryKey: "" });
   const actionSyncResults = ApiGetCall({
     ...syncQuery,
+  });
+  const clearHIBPKey = ApiPostCall({
+    relatedQueryKeys: ["Integrations"],
   });
   const handleIntegrationSync = () => {
     setSyncQuery({
@@ -191,6 +194,23 @@ const Page = () => {
                   </Button>
                 </Box>
               )}
+              {extension?.id === "HIBP" && (
+                <Box>
+                  <Button
+                    variant="outlined"
+                    color="warning"
+                    onClick={() =>
+                      clearHIBPKey.mutate({
+                        url: "/api/ExecExtensionClearHIBPKey",
+                        data: {},
+                      })
+                    }
+                    disabled={clearHIBPKey.isPending}
+                  >
+                    Clear API Key
+                  </Button>
+                </Box>
+              )}
               {extension?.links && (
                 <>
                   {extension.links.map((link, index) => (
@@ -208,6 +228,7 @@ const Page = () => {
             </Stack>
             <CippApiResults apiObject={actionTestResults} />
             <CippApiResults apiObject={actionSyncResults} />
+            <CippApiResults apiObject={clearHIBPKey} />
           </CardContent>
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider", px: "24px", m: "auto" }}>
